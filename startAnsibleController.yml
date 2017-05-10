@@ -1,0 +1,29 @@
+---
+- name: Start Ansible Controller
+  hosts: localhost
+  connection: local
+  roles: 
+   - startansiblecontroller
+
+- name: Getting the IP Address of ansible_controller
+  hosts: localhost
+  connection: local
+  tasks: 
+  - ec2_remote_facts:
+      region: us-east-1
+      filters:
+        instance-state-name: running
+        "tag:Name": ansible_controller
+    register: ec2_remote_facts
+
+  - name: Add box
+    add_host:
+      hostname: "{{ item.public_ip_address }}"
+      groups: ansible_controller
+    with_items: "{{ ec2_remote_facts.instances }}"
+
+- name: Attempting to SSH to Opsman
+  hosts: ansible_controller
+  remote_user: ec2-user
+  tasks: 
+   - shell: "/home/ec2-user/pcfdeployment/job.sh >  /home/ec2-user/output.txt"

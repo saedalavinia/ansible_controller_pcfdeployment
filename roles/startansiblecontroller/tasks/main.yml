@@ -1,0 +1,49 @@
+---
+#Author: Saed Alavinia 
+#Email: saedalav@gmail.com 
+#Github: github.com/saedalav 
+
+
+
+
+
+- name: Launch an EC2 Instance from an Ops Manager AMI
+  ec2:
+    key_name: "{{KeyPair}}"
+    region: "{{Region}}"
+    instance_type: "{{Type}}" 
+    wait: yes
+    image: "{{AMIID}}"
+    vpc_subnet_id: "{{Subnet}}"
+    assign_public_ip: yes
+    group_id: "sg-ee455e95"
+    instance_profile_name: "{{IAM}}"
+    volumes:
+      - device_name: /dev/sdb
+        volume_size: 16
+        delete_on_termination: true
+    instance_tags:
+      Name: ansible_controller
+    exact_count: 1
+    count_tag: Name
+  register: ec2
+
+- debug: 
+    msg: "  ------  {{ec2.instances}} ----- "
+
+
+- name: Add new instance to host group
+  add_host:
+    hostname: "{{ item.public_ip }}"
+    groupname: launched
+  with_items: "{{ ec2.instances }}"
+
+- name: Wait for SSH to come up
+  wait_for:
+    host: "{{ item.public_dns_name }}"
+    port: 22
+    delay: 350
+    timeout: 3200
+  with_items: "{{ ec2.instances }}"
+
+

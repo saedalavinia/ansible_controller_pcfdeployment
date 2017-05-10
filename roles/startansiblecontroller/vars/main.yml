@@ -1,0 +1,16 @@
+---
+#Author: Saed Alavinia 
+#Email: saedalav@gmail.com 
+#Github: github.com/saedalav 
+
+
+# vars file for pcf
+StackName: pcf-stack
+Region: us-east-1
+KeyPair: us-east-1
+Type: t2.micro
+AMIID: ami-025f2b14
+Subnet: subnet-bb5ea197
+IAM: FullAccess
+
+
